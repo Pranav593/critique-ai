@@ -1,9 +1,35 @@
+"use client";
+import { useState, useEffect } from "react"; // 1. Added React hooks
 import Link from "next/link";
 import Navbar from "../../components/Navbar";
 import AssignmentCard from "../../components/AssignmentCard";
-import { assignments } from "../../data/assignments";
+import { useAuth } from "../../context/AuthContext"; // 2. Import your Auth context
+import { getAssignments } from "../../../lib/firebase"; // 3. Import Jackson's function
 
 export default function Page() {
+  const { user } = useAuth(); // 4. Get the current user from context
+  const [assignments, setAssignments] = useState([]); // 5. State to hold assignments 
+  const [loading, setLoading] = useState(true); // 6. Loading state
+  useEffect(() => {
+    async function loadData() {
+      // Check if user exists before calling the function
+      if (currentUser?.uid) {
+        try {
+          const data = await getAssignments(currentUser.uid);
+          setAssignments(data);
+        } catch (error) {
+          console.error("Error loading assignments:", error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setAssignments([]);
+        setLoading(false);
+      }
+    }
+
+    loadData();
+  }, [currentUser]);
   return (
     <div>
       <Navbar />

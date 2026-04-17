@@ -4,7 +4,7 @@ import { auth } from "../../lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/Context/AuthContext";
+import { useAuth } from "../Context/AuthContext";
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("");

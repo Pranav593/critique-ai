@@ -1,6 +1,6 @@
 "use client"; // Required for Firebase hooks and state
 
-import { useAuth } from "@/app/Context/AuthContext";
+import { useAuth } from "../Context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { auth } from "../../lib/firebase";
