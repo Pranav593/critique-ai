@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import FeedbackCard from "./components/FeedbackCard";
+import FeedbackCard from "@/components/FeedbackCard";
 
 const sampleScores = {
   clarity: 8.5,

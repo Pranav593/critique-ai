@@ -1,4 +1,4 @@
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "@/app/Context/AuthContext";
 
 export default function Navbar() {
 
