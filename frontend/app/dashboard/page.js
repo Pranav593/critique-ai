@@ -2,12 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth, getAssignments, ensureAnonymousUser } from "../../lib/firebase";
 import { useRouter } from "next/navigation";
+
+import Navbar from "../../components/Navbar";
 import AssignmentCard from "../../components/AssignmentCard";
+import { useAuth } from "../../context/AuthContext";
+import { auth, getAssignments, ensureAnonymousUser } from "../../lib/firebase";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { user: contextUser } = useAuth();
 
   const [user, setUser] = useState(null);
   const [assignments, setAssignments] = useState([]);
@@ -18,16 +22,22 @@ export default function DashboardPage() {
 
     async function setupUserAndAssignments() {
       try {
-        const currentUser = auth.currentUser || (await ensureAnonymousUser());
+        let currentUser = contextUser || auth.currentUser;
 
-        if (unsubscribed) return;
+        // If no signed-in user, ensure anonymous session
+        if (!currentUser) {
+          currentUser = await ensureAnonymousUser();
+        }
+
+        if (unsubscribed || !currentUser) return;
 
         setUser(currentUser);
 
         const data = await getAssignments(currentUser.uid);
 
-        if (unsubscribed) return;
-        setAssignments(data);
+        if (!unsubscribed) {
+          setAssignments(data);
+        }
       } catch (error) {
         console.error("Error loading assignments:", error);
       } finally {
@@ -39,9 +49,9 @@ export default function DashboardPage() {
 
     setupUserAndAssignments();
 
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
       }
     });
 
@@ -49,10 +59,12 @@ export default function DashboardPage() {
       unsubscribed = true;
       unsubscribe();
     };
-  }, []);
+  }, [contextUser]);
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-8">
+      <Navbar />
+
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -60,7 +72,9 @@ export default function DashboardPage() {
               Your Assignments
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              {user?.isAnonymous ? "Guest session" : user?.email || "User session"}
+              {user?.isAnonymous
+                ? "Guest session"
+                : user?.email || "User session"}
             </p>
           </div>
 
@@ -94,7 +108,10 @@ export default function DashboardPage() {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {assignments.map((assignment) => (
-              <AssignmentCard key={assignment.id} assignment={assignment} />
+              <AssignmentCard
+                key={assignment.id}
+                assignment={assignment}
+              />
             ))}
           </div>
         )}
