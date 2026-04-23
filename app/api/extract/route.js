@@ -1,14 +1,29 @@
 import { NextResponse } from "next/server";
+import mammoth from "mammoth";
+import pdfParse from "pdf-parse/lib/pdf-parse";
 
 // Maximum file size: 10MB
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-// Allowed file types
-const ALLOWED_TYPES = [
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
-  "application/msword", // .doc
-];
+const PDF_TYPES = new Set(["application/pdf"]);
+const WORD_TYPES = new Set([
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/msword",
+]);
+
+function getFileExtension(name = "") {
+  const parts = name.toLowerCase().split(".");
+  return parts.length > 1 ? parts.at(-1) : "";
+}
+
+function isPdf(file) {
+  return PDF_TYPES.has(file.type) || getFileExtension(file.name) === "pdf";
+}
+
+function isWord(file) {
+  const ext = getFileExtension(file.name);
+  return WORD_TYPES.has(file.type) || ext === "docx" || ext === "doc";
+}
 
 export async function POST(req) {
   try {
@@ -27,17 +42,9 @@ export async function POST(req) {
     const file = formData.get("file");
 
     // Check if file exists
-    if (!file) {
+    if (!file || !(file instanceof File)) {
       return NextResponse.json(
         { error: "No file uploaded. Please select a PDF or Word document." },
-        { status: 400 }
-      );
-    }
-
-    // Check if it's actually a file
-    if (typeof file === "string") {
-      return NextResponse.json(
-        { error: "Invalid file upload. Please try again." },
         { status: 400 }
       );
     }
@@ -58,28 +65,15 @@ export async function POST(req) {
       );
     }
 
-    // Check file type
-    const fileType = file.type;
-    if (!ALLOWED_TYPES.includes(fileType)) {
-      return NextResponse.json(
-        { error: "Invalid file type. Please upload a PDF or Word document (.pdf, .doc, .docx)." },
-        { status: 400 }
-      );
-    }
-
     // Convert file to buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
+    const buffer = Buffer.from(await file.arrayBuffer());
     let extractedText = "";
 
     // Extract text based on file type
-    if (fileType === "application/pdf") {
-      // PDF extraction
+    if (isPdf(file)) {
       try {
-        const pdfParse = (await import("pdf-parse/lib/pdf-parse.js")).default;
-        const pdfData = await pdfParse(buffer);
-        extractedText = pdfData.text;
+        const parsed = await pdfParse(buffer);
+        extractedText = parsed.text || "";
       } catch (pdfError) {
         console.error("PDF parsing error:", pdfError);
         return NextResponse.json(
@@ -87,12 +81,10 @@ export async function POST(req) {
           { status: 400 }
         );
       }
-    } else {
-      // Word document extraction (.doc or .docx)
+    } else if (isWord(file)) {
       try {
-        const mammoth = await import("mammoth");
-        const result = await mammoth.extractRawText({ buffer });
-        extractedText = result.value;
+        const parsed = await mammoth.extractRawText({ buffer });
+        extractedText = parsed.value || "";
       } catch (wordError) {
         console.error("Word parsing error:", wordError);
         return NextResponse.json(
@@ -100,6 +92,11 @@ export async function POST(req) {
           { status: 400 }
         );
       }
+    } else {
+      return NextResponse.json(
+        { error: "Invalid file type. Please upload a PDF or Word document (.pdf, .doc, .docx)." },
+        { status: 415 }
+      );
     }
 
     // Check if any text was extracted
@@ -112,19 +109,19 @@ export async function POST(req) {
 
     // Return the extracted text
     return NextResponse.json(
-      { 
+      {
         text: extractedText.trim(),
         fileName: file.name,
         fileSize: file.size,
-        fileType: fileType
       },
       { status: 200 }
     );
 
   } catch (error) {
     console.error("Error in /api/extract:", error);
+    const message = error instanceof Error ? error.message : "Extraction failed.";
     return NextResponse.json(
-      { error: "An unexpected error occurred while processing the file. Please try again." },
+      { error: `An unexpected error occurred: ${message}` },
       { status: 500 }
     );
   }
