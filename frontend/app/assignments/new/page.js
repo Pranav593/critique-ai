@@ -64,7 +64,6 @@ export default function NewAssignmentPage() {
       await createAssignment(user.uid, {
         title,
         subject,
-        draftCount: 0,
       });
 
       router.push("/dashboard");

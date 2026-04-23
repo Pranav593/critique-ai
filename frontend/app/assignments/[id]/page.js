@@ -1,175 +1,255 @@
 "use client";
 
-const mockDrafts = [
-  {
-    draftNumber: 1,
-    scores: {
-      clarity: 5,
-      structure: 6,
-      evidence: 4,
-      depth: 5,
-    },
-  },
-  {
-    draftNumber: 2,
-    scores: {
-      clarity: 7,
-      structure: 7,
-      evidence: 6,
-      depth: 6,
-    },
-  },
-];
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth, subscribeToDrafts, createDraft } from "../../../lib/firebase";
+
+export default function AssignmentDetailPage() {
+  const params = useParams();
+  const assignmentId = params.id;
+
+  const [userId, setUserId] = useState(null);
+  const [drafts, setDrafts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [draftText, setDraftText] = useState("");
+  const [clarity, setClarity] = useState("");
+  const [structure, setStructure] = useState("");
+  const [evidence, setEvidence] = useState("");
+  const [depth, setDepth] = useState("");
+
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null);
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!userId || !assignmentId) return;
+
+    setLoading(true);
+
+    const unsubscribeDrafts = subscribeToDrafts(
+      userId,
+      assignmentId,
+      (draftsData) => {
+        setDrafts(draftsData);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribeDrafts();
+  }, [userId, assignmentId]);
+
+  async function handleSubmitDraft(e) {
+    e.preventDefault();
+
+    if (!userId || !assignmentId) {
+      alert("User or assignment is missing.");
+      return;
+    }
+
+    if (!draftText.trim()) {
+      alert("Please enter your draft text.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      await createDraft(userId, assignmentId, {
+        draftText,
+        scores: {
+          clarity: Number(clarity) || 0,
+          structure: Number(structure) || 0,
+          evidence: Number(evidence) || 0,
+          depth: Number(depth) || 0,
+        },
+      });
+
+      setDraftText("");
+      setClarity("");
+      setStructure("");
+      setEvidence("");
+      setDepth("");
+    } catch (error) {
+      console.error("Error creating draft:", error);
+      alert("Failed to submit draft.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (loading) {
+    return <p className="p-6">Loading drafts...</p>;
+  }
+
+  return (
+    <main className="min-h-screen bg-gray-50 px-6 py-8">
+      <div className="max-w-5xl mx-auto space-y-6">
+        <div className="bg-white border rounded-xl p-8 shadow-sm">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Score Comparison
+          </h1>
+          <p className="text-gray-500 mb-6">
+            Compare how your writing improves across drafts.
+          </p>
+
+          <form onSubmit={handleSubmitDraft} className="space-y-5 mb-8">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Draft Text
+              </label>
+              <textarea
+                value={draftText}
+                onChange={(e) => setDraftText(e.target.value)}
+                placeholder="Paste your new draft here..."
+                rows={8}
+                className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Clarity
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  value={clarity}
+                  onChange={(e) => setClarity(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0-10"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Structure
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  value={structure}
+                  onChange={(e) => setStructure(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0-10"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Evidence
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  value={evidence}
+                  onChange={(e) => setEvidence(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0-10"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Depth
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  value={depth}
+                  onChange={(e) => setDepth(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="0-10"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+            >
+              {submitting ? "Submitting..." : "Submit New Draft"}
+            </button>
+          </form>
+
+          {drafts.length === 0 ? (
+            <p className="text-gray-500">No drafts yet.</p>
+          ) : (
+            <>
+              {drafts.length === 1 && (
+                <p className="text-sm text-gray-500 mb-4">
+                  You only have one draft so far. Add more drafts to compare progress over time.
+                </p>
+              )}
+
+              <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2">
+                {drafts.map((draft, index) => (
+                  <div
+                    key={draft.id}
+                    className="border rounded-xl p-5 bg-gray-50"
+                  >
+                    <h2 className="text-xl font-semibold mb-4">
+                      Draft {drafts.length - index}
+                    </h2>
+
+                    <ScoreBar label="Clarity" value={draft.scores?.clarity || 0} />
+                    <ScoreBar label="Structure" value={draft.scores?.structure || 0} />
+                    <ScoreBar label="Evidence" value={draft.scores?.evidence || 0} />
+                    <ScoreBar label="Depth" value={draft.scores?.depth || 0} />
+
+                    {draft.draftText && (
+                      <div className="mt-4">
+                        <p className="text-sm font-medium text-gray-700 mb-1">
+                          Draft Text
+                        </p>
+                        <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                          {draft.draftText}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}
 
 function ScoreBar({ label, value }) {
   return (
-    <div>
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-sm font-medium text-gray-700 capitalize">
-          {label}
-        </span>
-        <span className="text-sm text-gray-500">{value}/10</span>
+    <div className="mb-4">
+      <div className="flex justify-between mb-1">
+        <span className="font-medium text-gray-700">{label}</span>
+        <span className="text-gray-600">{value}/10</span>
       </div>
 
       <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
         <div
-          className="h-full bg-blue-600 rounded-full transition-all duration-300"
+          className="h-3 bg-blue-600 rounded-full transition-all duration-300"
           style={{ width: `${value * 10}%` }}
         />
       </div>
     </div>
-  );
-}
-
-function ScoreChange({ current, previous }) {
-  const change = current - previous;
-
-  if (change > 0) {
-    return <span className="text-green-600 font-medium">+{change}</span>;
-  }
-
-  if (change < 0) {
-    return <span className="text-red-600 font-medium">{change}</span>;
-  }
-
-  return <span className="text-gray-500 font-medium">0</span>;
-}
-
-export default function AssignmentDetailPage() {
-  const draft1 = mockDrafts[0];
-  const draft2 = mockDrafts[1];
-
-  return (
-    <main className="min-h-screen bg-gray-50 px-6 py-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Assignment Details
-          </h1>
-          <p className="text-gray-500">
-            Compare how your writing improved across drafts.
-          </p>
-        </div>
-
-        <section className="mb-10">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Score Comparison
-          </h2>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            {mockDrafts.map((draft) => (
-              <div
-                key={draft.draftNumber}
-                className="bg-white border rounded-xl p-6 shadow-sm"
-              >
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-xl font-semibold text-gray-800">
-                    Draft {draft.draftNumber}
-                  </h3>
-                  <span className="text-sm text-gray-500">
-                    Scores out of 10
-                  </span>
-                </div>
-
-                <div className="space-y-4">
-                  <ScoreBar label="clarity" value={draft.scores.clarity} />
-                  <ScoreBar label="structure" value={draft.scores.structure} />
-                  <ScoreBar label="evidence" value={draft.scores.evidence} />
-                  <ScoreBar label="depth" value={draft.scores.depth} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Improvement Summary
-          </h2>
-
-          <div className="bg-white border rounded-xl p-6 shadow-sm overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-2 text-gray-700">Category</th>
-                  <th className="text-left py-3 px-2 text-gray-700">Draft 1</th>
-                  <th className="text-left py-3 px-2 text-gray-700">Draft 2</th>
-                  <th className="text-left py-3 px-2 text-gray-700">Change</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b">
-                  <td className="py-3 px-2 font-medium text-gray-800">Clarity</td>
-                  <td className="py-3 px-2">{draft1.scores.clarity}</td>
-                  <td className="py-3 px-2">{draft2.scores.clarity}</td>
-                  <td className="py-3 px-2">
-                    <ScoreChange
-                      current={draft2.scores.clarity}
-                      previous={draft1.scores.clarity}
-                    />
-                  </td>
-                </tr>
-
-                <tr className="border-b">
-                  <td className="py-3 px-2 font-medium text-gray-800">Structure</td>
-                  <td className="py-3 px-2">{draft1.scores.structure}</td>
-                  <td className="py-3 px-2">{draft2.scores.structure}</td>
-                  <td className="py-3 px-2">
-                    <ScoreChange
-                      current={draft2.scores.structure}
-                      previous={draft1.scores.structure}
-                    />
-                  </td>
-                </tr>
-
-                <tr className="border-b">
-                  <td className="py-3 px-2 font-medium text-gray-800">Evidence</td>
-                  <td className="py-3 px-2">{draft1.scores.evidence}</td>
-                  <td className="py-3 px-2">{draft2.scores.evidence}</td>
-                  <td className="py-3 px-2">
-                    <ScoreChange
-                      current={draft2.scores.evidence}
-                      previous={draft1.scores.evidence}
-                    />
-                  </td>
-                </tr>
-
-                <tr>
-                  <td className="py-3 px-2 font-medium text-gray-800">Depth</td>
-                  <td className="py-3 px-2">{draft1.scores.depth}</td>
-                  <td className="py-3 px-2">{draft2.scores.depth}</td>
-                  <td className="py-3 px-2">
-                    <ScoreChange
-                      current={draft2.scores.depth}
-                      previous={draft1.scores.depth}
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-      </div>
-    </main>
   );
 }

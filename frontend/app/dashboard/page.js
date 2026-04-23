@@ -39,9 +39,18 @@ export default function DashboardPage() {
 
     setupUserAndAssignments();
 
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser || unsubscribed) return;
+
+      setUser(currentUser);
+
+      try {
+        const data = await getAssignments(currentUser.uid);
+        if (!unsubscribed) {
+          setAssignments(data);
+        }
+      } catch (error) {
+        console.error("Error refreshing assignments:", error);
       }
     });
 
