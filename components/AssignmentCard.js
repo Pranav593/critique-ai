@@ -5,10 +5,6 @@ import { useRouter } from "next/navigation";
 export default function AssignmentCard({ assignment }) {
   const router = useRouter();
 
-  const createdDate = assignment.createdAt?.toDate
-    ? assignment.createdAt.toDate().toLocaleDateString()
-    : "No date";
-
   return (
     <div
       onClick={() => router.push(`/assignments/${assignment.id}`)}
@@ -18,16 +14,16 @@ export default function AssignmentCard({ assignment }) {
         {assignment.title}
       </h2>
 
-      <p className="text-gray-600 mb-1">
-        <span className="font-medium">Subject:</span> {assignment.subject}
+      <p className="text-gray-600 mb-2">{assignment.subject}</p>
+
+      <p className="text-sm text-gray-500 mb-1">
+        {assignment.draftCount || 0} drafts
       </p>
 
-      <p className="text-gray-600 mb-1">
-        <span className="font-medium">Drafts:</span> {assignment.draftCount || 0}
-      </p>
-
-      <p className="text-sm text-gray-500 mt-3">
-        Created: {createdDate}
+      <p className="text-sm text-gray-400">
+        Created {assignment.createdAt?.toDate
+          ? assignment.createdAt.toDate().toLocaleDateString()
+          : "Recently"}
       </p>
     </div>
   );
