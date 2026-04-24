@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 13, "column": 0}, "map": {"version":3,"sources":["file:///Users/khushiverma/critique-ai/frontend/app/favicon.ico.mjs%20%28structured%20image%20object%29"],"sourcesContent":["import src from \"IMAGE\";\nexport default { src, width: 256, height: 256 }\n"],"names":["src","width","height"],"mappings":";;;;AAAA;;uCACe;IAAEA,KAAAA,+IAAG;IAAEC,OAAO;IAAKC,QAAQ;AAAI"}},
-    {"offset": {"line": 28, "column": 0}, "map": {"version":3,"sources":["file:///Users/khushiverma/critique-ai/frontend/app/assignments/%5Bid%5D/page.js"],"sourcesContent":["export default async function AssignmentPage({ params }) {\n  const { id } = await params;\n\n  return <h1>Assignment ID: {id}</h1>;\n}"],"names":["AssignmentPage","params","id"],"mappings":";;;;;;AAAe,eAAeA,eAAe,EAAEC,MAAM,EAAE;IACrD,MAAM,EAAEC,EAAE,EAAE,GAAG,MAAMD;IAErB,qBAAO,8OAAC;;YAAG;YAAgBC;;;;;;;AAC7B"}}]
-}
