@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createAssignment, auth } from "@/lib/firebase";
+import { createAssignment, createDraft, auth } from "@/lib/firebase";
 
 export default function NewAssignmentPage() {
   const [title, setTitle] = useState("");
@@ -57,17 +57,62 @@ export default function NewAssignmentPage() {
         return;
       }
 
-      const data = {
+      let finalContextText = contextStatement.trim();
+
+      if (contextMode === "rubric" && rubricFile) {
+        const rubricFormData = new FormData();
+        rubricFormData.append("file", rubricFile);
+        
+        const res = await fetch("/api/extract", { method: "POST", body: rubricFormData });
+        const extraction = await res.json();
+        
+        if (!res.ok) throw new Error(extraction.error || "Failed to read rubric file.");
+        finalContextText = extraction.text;
+      }
+
+      let finalAssignmentText = assignmentText.trim();
+
+      if (assignmentMode === "file" && assignmentFile) {
+        const assignFormData = new FormData();
+        assignFormData.append("file", assignmentFile);
+        
+        const res = await fetch("/api/extract", { method: "POST", body: assignFormData });
+        const extraction = await res.json();
+        
+        if (!res.ok) throw new Error(extraction.error || "Failed to read assignment file.");
+        finalAssignmentText = extraction.text;
+      }
+      const assignmentData = {
         title: title.trim(),
         subject: subject.trim(),
         contextType: contextMode,
-        contextText: contextMode === "statement" ? contextStatement.trim() : rubricFile?.name || "",
-        assignmentType: assignmentMode,
-        assignmentText: assignmentMode === "paste" ? assignmentText.trim() : assignmentFile?.name || "",
+        contextText: finalContextText, // We save the EXTRACTED text here
+        createdAt: new Date(),
       };
 
-      await createAssignment(user.uid, data);
-      router.push("/dashboard");
+      const assignmentId = await createAssignment(user.uid, assignmentData);
+
+      const analyzeRes = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: finalAssignmentText,
+          context: finalContextText,
+        }),
+      });
+
+      const analyzeData = await analyzeRes.json();
+      if (!analyzeRes.ok) throw new Error(analyzeData.error || "AI Analysis failed.");
+
+      await createDraft(user.uid, assignmentId, {
+        draftNumber: 1,
+        draftText: finalAssignmentText,
+        scores: analyzeData.scores,
+        feedback: analyzeData.feedback || [],
+        createdAt: new Date(),
+      });
+
+      router.push(`/dashboard/${assignmentId}`);
 
     } catch (err) {
       console.error(err);
