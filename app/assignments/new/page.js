@@ -112,7 +112,7 @@ export default function NewAssignmentPage() {
         createdAt: new Date(),
       });
 
-      router.push(`/dashboard/${assignmentId}`);
+      router.push(`/assignments/${assignmentId}`);
 
     } catch (err) {
       console.error(err);
@@ -122,136 +122,140 @@ export default function NewAssignmentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-t from-black via-blue-950 to-blue-900 text-white flex flex-col items-center justify-center p-6" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+    <div className="min-h-screen bg-[#F4F4F4] text-[#1A1A1A] flex flex-col items-center justify-center p-8">
       
-      {/* Branding Header */}
-      <div className="mb-10 text-center">
-        <h2 className="text-7xl font-black italic tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-white drop-shadow-[0_6px_6px_rgba(0,0,128,0.9)]">
-          CritiqueAI
+      <div className="mb-12 text-center">
+        <h2 className="text-4xl font-light tracking-[0.2em] uppercase text-[#1A1A1A]">
+          Critique.AI
         </h2>
       </div>
 
-      {/* Central Box */}
-      <div className="w-full max-w-lg bg-black/80 backdrop-blur-xl p-10 rounded-[40px] border-2 border-blue-400/50 shadow-[0_0_25px_rgba(96,165,250,0.2)] relative overflow-hidden">
+      <div className="w-full max-w-2xl bg-white p-12 border border-[#1A1A1A] shadow-none relative">
         
-        <header className="text-center mb-8">
-          <h1 className="text-3xl font-bold italic tracking-tight">
-            Create Assignment
+        <header className="text-center mb-10 border-b border-gray-200 pb-8">
+          <h1 className="text-2xl font-light uppercase tracking-widest text-[#1A1A1A]">
+            Define Assignment
           </h1>
-          {error && <p className="text-red-400 mt-4 font-bold">{error}</p>}
+          {error && <p className="text-red-600 mt-6 text-sm tracking-wide border border-red-600 p-2 font-medium">{error}</p>}
         </header>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <input
-            placeholder="Assignment Title"
-            className="w-full p-4 bg-white/5 border border-white/20 rounded-full focus:ring-2 focus:ring-blue-400 outline-none transition-all placeholder:text-zinc-500 text-center"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          
-          <input
-            placeholder="Subject / Course"
-            className="w-full p-4 bg-white/5 border border-white/20 rounded-full focus:ring-2 focus:ring-blue-400 outline-none transition-all placeholder:text-zinc-500 text-center"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-          />
-
-          {/* Grading Criteria */}
-          <p className="text-xs text-zinc-400 uppercase tracking-widest text-center">Step 1 — Grading Criteria</p>
-
-          <div className="flex bg-white/10 p-1 rounded-full border border-white/10">
-            <button
-              type="button"
-              onClick={() => setContextMode("rubric")}
-              className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${contextMode === "rubric" ? "bg-blue-700 text-white shadow-md" : "text-zinc-400 hover:text-zinc-200"}`}
-            >
-              Upload Rubric
-            </button>
-            <button
-              type="button"
-              onClick={() => setContextMode("statement")}
-              className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${contextMode === "statement" ? "bg-blue-700 text-white shadow-md" : "text-zinc-400 hover:text-zinc-200"}`}
-            >
-              Context Statement
-            </button>
+        <form onSubmit={handleSubmit} className="space-y-10">
+          <div className="space-y-6">
+            <input
+              placeholder="ASSIGNMENT TITLE"
+              className="w-full p-4 bg-transparent border border-[#1A1A1A] focus:outline-none focus:ring-1 focus:ring-[#1A1A1A] text-sm tracking-widest placeholder:text-gray-400 rounded-none text-center"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+            
+            <input
+              placeholder="SUBJECT / DISCIPLINE"
+              className="w-full p-4 bg-transparent border border-[#1A1A1A] focus:outline-none focus:ring-1 focus:ring-[#1A1A1A] text-sm tracking-widest placeholder:text-gray-400 rounded-none text-center"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+            />
           </div>
 
-          <div className="flex justify-center">
-            {contextMode === "rubric" ? (
-              <div className="bg-white/5 border border-dashed border-white/20 p-4 rounded-3xl w-full flex justify-center items-center">
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="text-sm text-zinc-400 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-700 file:text-white hover:file:bg-blue-600 cursor-pointer"
-                  onChange={(e) => setRubricFile(e.target.files[0])}
+          <div className="pt-4">
+            <p className="text-xs text-gray-500 uppercase tracking-[0.2em] text-center mb-6">Phase 1: Evaluation Metrics</p>
+
+            <div className="flex border border-[#1A1A1A] rounded-none bg-transparent">
+              <button
+                type="button"
+                onClick={() => setContextMode("rubric")}
+                className={`flex-1 py-4 text-xs font-medium tracking-widest uppercase transition-colors rounded-none ${contextMode === "rubric" ? "bg-[#1A1A1A] text-white" : "text-[#1A1A1A] hover:bg-gray-50"}`}
+              >
+                Upload Rubric
+              </button>
+              <button
+                type="button"
+                onClick={() => setContextMode("statement")}
+                className={`flex-1 py-4 text-xs font-medium tracking-widest uppercase transition-colors rounded-none border-l border-[#1A1A1A] ${contextMode === "statement" ? "bg-[#1A1A1A] text-white" : "text-[#1A1A1A] hover:bg-gray-50"}`}
+              >
+                Context Text
+              </button>
+            </div>
+
+            <div className="mt-8 flex justify-center">
+              {contextMode === "rubric" ? (
+                <div className="border border-dashed border-[#1A1A1A] p-8 w-full flex justify-center items-center bg-gray-50 rounded-none">
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="text-xs uppercase tracking-widest text-[#1A1A1A] file:mr-6 file:py-3 file:px-6 file:rounded-none file:border file:border-[#1A1A1A] file:text-xs file:font-medium file:bg-white file:text-[#1A1A1A] hover:file:bg-gray-100 cursor-pointer transition-colors"
+                    onChange={(e) => setRubricFile(e.target.files[0])}
+                  />
+                </div>
+              ) : (
+                <textarea
+                  placeholder="Specify grading focus..."
+                  className="w-full p-6 bg-transparent border border-[#1A1A1A] focus:outline-none focus:ring-1 focus:ring-[#1A1A1A] text-sm tracking-wide placeholder:text-gray-400 rounded-none"
+                  rows="4"
+                  value={contextStatement}
+                  onChange={(e) => setContextStatement(e.target.value)}
                 />
-              </div>
-            ) : (
-              <textarea
-                placeholder="Enter context statement..."
-                className="w-full p-4 bg-white/5 border border-white/20 rounded-[30px] focus:ring-2 focus:ring-blue-400 outline-none transition-all placeholder:text-zinc-500"
-                rows="3"
-                value={contextStatement}
-                onChange={(e) => setContextStatement(e.target.value)}
-              />
-            )}
+              )}
+            </div>
           </div>
 
-          {/* Your Assignment */}
-          <p className="text-xs text-zinc-400 uppercase tracking-widest text-center">Step 2 — Your Assignment</p>
+          <div className="pt-4 border-t border-gray-200">
+            <p className="text-xs text-gray-500 uppercase tracking-[0.2em] text-center mb-6">Phase 2: Draft Submission</p>
 
-          <div className="flex bg-white/10 p-1 rounded-full border border-white/10">
-            <button
-              type="button"
-              onClick={() => setAssignmentMode("file")}
-              className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${assignmentMode === "file" ? "bg-blue-700 text-white shadow-md" : "text-zinc-400 hover:text-zinc-200"}`}
-            >
-              Upload File
-            </button>
-            <button
-              type="button"
-              onClick={() => setAssignmentMode("paste")}
-              className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${assignmentMode === "paste" ? "bg-blue-700 text-white shadow-md" : "text-zinc-400 hover:text-zinc-200"}`}
-            >
-              Paste Text
-            </button>
-          </div>
+            <div className="flex border border-[#1A1A1A] rounded-none bg-transparent">
+              <button
+                type="button"
+                onClick={() => setAssignmentMode("file")}
+                className={`flex-1 py-4 text-xs font-medium tracking-widest uppercase transition-colors rounded-none ${assignmentMode === "file" ? "bg-[#1A1A1A] text-white" : "text-[#1A1A1A] hover:bg-gray-50"}`}
+              >
+                Upload Document
+              </button>
+              <button
+                type="button"
+                onClick={() => setAssignmentMode("paste")}
+                className={`flex-1 py-4 text-xs font-medium tracking-widest uppercase transition-colors rounded-none border-l border-[#1A1A1A] ${assignmentMode === "paste" ? "bg-[#1A1A1A] text-white" : "text-[#1A1A1A] hover:bg-gray-50"}`}
+              >
+                Paste Text
+              </button>
+            </div>
 
-          <div className="flex justify-center">
-            {assignmentMode === "file" ? (
-              <div className="bg-white/5 border border-dashed border-white/20 p-4 rounded-3xl w-full flex flex-col items-center gap-2">
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="text-sm text-zinc-400 file:mr-4 file:py-2 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-700 file:text-white hover:file:bg-blue-600 cursor-pointer"
-                  onChange={(e) => setAssignmentFile(e.target.files[0])}
+            <div className="mt-8 flex justify-center">
+              {assignmentMode === "file" ? (
+                <div className="border border-dashed border-[#1A1A1A] p-8 w-full flex flex-col items-center gap-4 bg-gray-50 rounded-none">
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="text-xs uppercase tracking-widest text-[#1A1A1A] file:mr-6 file:py-3 file:px-6 file:rounded-none file:border file:border-[#1A1A1A] file:text-xs file:font-medium file:bg-white file:text-[#1A1A1A] hover:file:bg-gray-100 cursor-pointer transition-colors"
+                    onChange={(e) => setAssignmentFile(e.target.files[0])}
+                  />
+                  {assignmentFile && (
+                    <p className="text-xs text-gray-500 font-mono">SELECTED: {assignmentFile.name}</p>
+                  )}
+                </div>
+              ) : (
+                <textarea
+                  placeholder="Paste student draft here..."
+                  className="w-full p-6 bg-transparent border border-[#1A1A1A] focus:outline-none focus:ring-1 focus:ring-[#1A1A1A] text-sm tracking-wide placeholder:text-gray-400 rounded-none font-mono"
+                  rows="8"
+                  value={assignmentText}
+                  onChange={(e) => setAssignmentText(e.target.value)}
                 />
-                {assignmentFile && (
-                  <p className="text-xs text-zinc-500">Selected: {assignmentFile.name}</p>
-                )}
-              </div>
-            ) : (
-              <textarea
-                placeholder="Paste your assignment text here..."
-                className="w-full p-4 bg-white/5 border border-white/20 rounded-[30px] focus:ring-2 focus:ring-blue-400 outline-none transition-all placeholder:text-zinc-500"
-                rows="5"
-                value={assignmentText}
-                onChange={(e) => setAssignmentText(e.target.value)}
-              />
-            )}
+              )}
+            </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-700 hover:bg-blue-600 py-4 rounded-full font-bold text-white shadow-lg shadow-blue-900/40 transition-transform active:scale-95 italic text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Saving..." : "Submit Assignment"}
-          </button>
+          <div className="pt-8 border-t border-[#1A1A1A]">
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-5 text-xs uppercase tracking-[0.2em] font-medium transition-colors border border-[#1A1A1A] rounded-none ${loading ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-[#1A1A1A] text-white hover:bg-black"}`}
+            >
+              {loading ? "Analyzing Draft..." : "Submit Assignment"}
+            </button>
+          </div>
         </form>
 
-        <Link href="/dashboard" className="text-zinc-500 hover:text-white transition-colors text-sm underline block mt-8 text-center">
-          ← Back to Dashboard
+        <Link href="/dashboard" className="text-gray-500 hover:text-[#1A1A1A] transition-colors text-xs uppercase tracking-widest block mt-10 text-center font-medium">
+          Cancel and return to Dashboard
         </Link>
       </div>
     </div>
