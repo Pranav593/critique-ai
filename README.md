@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Critique AI
 
-## Getting Started
+An AI-powered assignment analysis and critique platform built with Next.js, Firebase, and Gemini AI. 
 
-First, run the development server:
+Critique AI empowers users to submit drafts of their assignments, automates document text extraction, and uses AI to provide actionable feedback, helping students or writers iterate and improve their work over time.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Authentication**: Secure login and signup powered by [Firebase Authentication](https://firebase.google.com/).
+- **Assignment Management**: Create, and manage ongoing assignments from a dedicated dashboard.
+- **Draft History & Tracking**: Iteratively upload new drafts and track progress visually over time using Recharts.
+- **Document Processing**: Automatic text extraction from `.pdf` and `.docx` using `pdf-parse` and `mammoth`.
+- **AI Analysis**: Intelligent, tailored critiques and actionable feedback provided using the Gemini API (`@google/generative-ai`).
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🛠 Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework**: [Next.js](https://nextjs.org) (App Router)
+- **Library**: [React](https://react.dev)
+- **Database & Auth**: [Firebase](https://firebase.google.com/)
+- **AI Integration**: [Google Gemini API](https://ai.google.dev/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Data Visualization**: [Recharts](https://recharts.org/)
 
-## Learn More
+## ⚙️ Getting Started
 
-To learn more about Next.js, take a look at the following resources:
+### Prerequisites
+- Node.js
+- Firebase project configuration details
+- Google Gemini API key
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Clone the repository:**
+   ```bash
+   git clone <your-repo-url>
+   cd critique-ai
+   ```
 
-## Deploy on Vercel
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. **Set up environment variables:**
+   Create a `.env.local` file in the root directory and add your Firebase and Gemini credentials:
+   ```env
+   NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_firebase_project_id
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_bucket
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+   GEMINI_API_KEY=your_gemini_api_key
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open the App:**
+   Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
